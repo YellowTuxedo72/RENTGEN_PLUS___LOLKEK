@@ -1,0 +1,196 @@
+
+
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Интерфейс — макет с загрузкой изображений и DICOM->JPEG</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<div id="welcomeOverlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal modal-wrap" role="document" aria-labelledby="modalTitle">
+    <button class="close-btn" id="closeWelcomeBtn" aria-label="Закрыть окно">&times;</button>
+    <div class="big" aria-hidden="true"></div>
+    <div class="side">
+      <div class="title-slab">
+        <div id="modalTitle" style="font-weight:700;font-size:35px;color:#fff;">Добро пожаловать</div>
+        <div style="color:#9fb0b8;font-size:25px;margin-top:6px;">в Рентген+</div>
+      </div>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque.</p>
+      <div style="margin-top:14px;">
+        <a id="closeWelcomeBtn2" style="color:#9fd6ff;text-decoration:none;" aria-label="Закрыть окно">
+        <label id="addLabel2">Добавить
+          <input id="fileInput2" type="file" accept=".jpg,.jpeg,image/jpeg,.dcm,application/dicom" />
+        </label>
+        </a>
+      </div>
+      <div class="file-links">
+        <a href="#">LolKek.dicom</a>
+        <a href="#">Пациент_00001.jpg</a>
+      </div>
+
+      <div class="warn">
+        <strong>ВНИМАНИЕ:</strong> Программа находится на стадии разработки. Некоторые функции могут отсутствовать или работать нестабильно.
+      </div>
+    </div>
+  </div>
+</div>
+<div id="analysisOverlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal-wrap">
+    <div class="analysis-modal">
+      <button class="close-btn" id="closeAnalysisBtn" aria-label="Закрыть окно">&times;</button>
+      
+      <div class="analysis-title">Анализ рентгена с помощью ИИ</div>
+      
+      <div class="analysis-description">
+        К сожалению, на данный момент нейросеть ещё не обучена с достаточной точностью определять все необходимые объекты на изображении. Поэтому на следующем этапе вам будет предложено вручную ввести некоторые параметры и при необходимости отредактировать изображение для более корректной дальнейшей обработки.
+      </div>
+
+      <div class="analysis-content">
+        <div class="image-preview-section">
+          <div class="image-preview" id="imagePreviewContainer">
+            <img id="analysisImage" src="data:image/svg+xml;charset=UTF-8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='600' height='420'><rect width='100%' height='100%' fill='%23242323'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23999999' font-family='Arial' font-size='18'>Выберите снимок для анализа</text></svg>" alt="Рентген">
+          </div>
+          
+          <div class="image-controls">
+            <div class="control-btn" id="flipBtn">
+              <svg viewBox="0 0 24 24"><path d="M3 3h7v18H3zM14 3h7v18h-7z"/></svg>
+              <span>Отразить</span>
+            </div>
+            <div class="control-btn" id="rotateBtn">
+              <svg viewBox="0 0 24 24"><path d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5 0 .66-.13 1.28-.36 1.86l1.46 1.46C19.83 15.48 20 14.76 20 14c0-3.87-3.13-7-7-7z"/></svg>
+              <span>Повернуть</span>
+            </div>
+          </div>
+
+          <div class="preview-hint">
+            <strong>Важно:</strong> Убедитесь, что изображение находится в правильной ориентации. Пациент на снимке должен быть расположен так, как будто он смотрит прямо на вас: левая сторона пациента должна находиться справа на изображении, а правая сторона пациента — слева. Это необходимо для корректного анализа.
+          </div>
+        </div>
+        <div class="form-section">
+          <form id="analysisForm">
+          <div class="form-group">
+            <label>Тип снимка</label>
+            <div class="custom-select-wrapper">
+              <div class="custom-select" id="shotTypeSelect">
+                <div class="select-trigger" id="shotTypeTrigger">
+                  <span id="selectedShotType">Выберите тип</span>
+                  <svg class="chevron" viewBox="0 0 24 24"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                </div>
+                <div class="select-options" id="shotTypeOptions">
+                  <div class="select-option" data-value="pelvis">Тазобедренный сустав</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Предполагаемый диагноз</label>
+            <div class="custom-select-wrapper">
+              <div class="custom-select" id="diagnosisSelect">
+                <div class="select-trigger" id="diagnosisTrigger">
+                  <span id="selectedDiagnosis">Выберите диагноз</span>
+                  <svg class="chevron" viewBox="0 0 24 24"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                </div>
+                <div class="select-options" id="diagnosisOptions">
+                  <div class="select-option" data-value="pneumonia">Дисплазия</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Возраст пациента</label>
+            <div class="age-row">
+              <input type="number" class="age-input" id="patientAge" placeholder="Введите возраст" min="0" max="130">
+              <select class="age-select" id="ageUnit">
+                <option value="years">лет</option>
+                <option value="months">месяцев</option>
+                <option value="days">дней</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="selected-image-info">
+            <div class="info-label">Выбранный снимок:</div>
+            <div class="info-value" id="selectedImageName">Не выбран</div>
+          </div>
+              <div class="modal-footer">
+                <button type="button" class="modal-btn" id="cancelAnalysis">
+                  Отмена
+                </button>
+
+                <button type="submit" class="modal-btn primary">
+                  Отправить на анализ
+                </button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<body>
+  
+  <div class="app" id="app">
+    <div class="topbar">
+      <div class="top-left">
+        <button class="btn">Настройки</button>
+        <label class="btn" id="addLabel">Добавить
+          <input id="fileInput" type="file" accept=".jpg,.jpeg,image/jpeg,.dcm,application/dicom" />
+        </label>
+        <p class="btn2"> Колёсико мыши - приблизить или отдалить изображение</p>
+        <p class="btn2"> Изображения можно перемещать и удалять из области</p>
+      </div>
+
+    </div>
+
+    <div class="canvas-area" id="canvasArea">
+      <div class="left-tools" id="leftTools">
+        <div class="tool" data-tool="LineStrip" title="Соединить">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 12h4l3 6 5-12h3" stroke="#43f3c4" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="tool" data-tool="Angel" title="Измерение">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 12h18M12 3v18" stroke="#43f3c4" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+
+      <div class="canvas-inner" id="canvasInner">
+        <div class="image-layer" id="imageLayer">
+        </div>
+        <div class="canvas-note">Загруженные изображения появляются здесь</div>
+      </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+  <div class="header">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div>Пациент</div>
+      <button class="toggle-graph" id="toggleGraph">Скрыть графику</button>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; padding: 4px 0; width: 100%;">
+      <input type="text" id="patientName" placeholder="Введите ФИО пациента" 
+             style="flex: 1; padding: 8px; background: var(--panel-dark); border: 1px solid var(--border); 
+                    color: var(--text); border-radius: 4px; font-size: 13px;">
+      <button class="btn" id="saveBtn"> Сохранить</button>
+    </div>
+  </div>
+      <div class="character" id="character">
+        <div class="small">У вас нет проведенных анализов<br>по данному снимку</div>
+        <a id="doAnalysis">Провести анализ</a>
+      </div>
+
+      <div class="shots" id="shots">
+        <div class="title">Снимки</div>
+        <div class="shot-list stripe-list " id="shotList">
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/dicom-parser/dist/dicomParser.min.js"></script>
+  <script type="module" src="/static/script.js"></script>
+</body>
+</html>
